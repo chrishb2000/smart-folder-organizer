@@ -1,4 +1,4 @@
-const api = window.api;
+const sfoApi = window.api;
 
 const CATEGORY_ORDER = ['Imagenes', 'Videos', 'Audios', 'Documentos', 'Instaladores', 'Comprimidos', 'Codigo', 'Otros'];
 
@@ -89,7 +89,7 @@ $('clearHistoryBtn').addEventListener('click', () => {
 
 /* ---------- Folder selection ---------- */
 $('selectFolderBtn').addEventListener('click', async () => {
-  const folder = await api.selectFolder();
+  const folder = await sfoApi.selectFolder();
   if (!folder) return;
   $('selectedFolder').textContent = `Analizando: ${folder}`;
   $('selectedFolder').classList.remove('hidden');
@@ -100,7 +100,7 @@ $('selectFolderBtn').addEventListener('click', async () => {
   addHistory(`Analisis iniciado de: ${folder}`);
 
   try {
-    scanData = await api.scanFolder(folder);
+    scanData = await sfoApi.scanFolder(folder);
     renderResults(scanData);
     $('selectedFolder').textContent = `Carpeta analizada: ${folder}`;
     $('statsView').classList.remove('hidden');
@@ -114,7 +114,7 @@ $('selectFolderBtn').addEventListener('click', async () => {
   }
 });
 
-api.onScanProgress(({ scanned, current }) => {
+sfoApi.onScanProgress(({ scanned, current }) => {
   $('progressText').textContent = `Escaneando: ${scanned} archivos - ${current || ''}`;
 });
 
@@ -158,7 +158,7 @@ function renderCategories(categories) {
 $('previewPlanBtn').addEventListener('click', async () => {
   if (!scanData) return;
   const selected = Array.from(document.querySelectorAll('.cat-check:checked')).map((el) => el.value);
-  const result = await api.buildOrganizePlan({
+  const result = await sfoApi.buildOrganizePlan({
     folderPath: scanData.folder,
     includeCategories: selected
   });
@@ -188,7 +188,7 @@ $('applyPlanBtn').addEventListener('click', async () => {
     `Se moveran <strong>${currentPlan.length}</strong> archivos a subcarpetas por categoria dentro de ${escapeHtml(scanData.folder)}. Continuar?`
   );
   if (!ok) return;
-  const result = await api.applyOrganizePlan({ folderPath: scanData.folder, plan: currentPlan });
+  const result = await sfoApi.applyOrganizePlan({ folderPath: scanData.folder, plan: currentPlan });
   result.log.forEach((l) => addHistory(l));
   showToast(`Organizacion aplicada: ${result.moved} movidos, ${result.failed} con error.`);
   addHistory(`Organizacion: ${result.moved} archivos movidos, ${result.failed} errores.`);
@@ -231,7 +231,7 @@ function renderDuplicates(groups) {
         `Se eliminaran <strong>${toDelete.length}</strong> copias duplicadas (se conserva la primera). Espacio a liberar: <strong>${formatBytes(group.size * toDelete.length)}</strong>.`
       );
       if (!ok) return;
-      const result = await api.deleteDuplicates({ files: toDelete });
+      const result = await sfoApi.deleteDuplicates({ files: toDelete });
       result.log.forEach((l) => addHistory(l));
       showToast(`Duplicados eliminados: ${result.deleted}`);
       addHistory(`Duplicados: ${result.deleted} copias eliminadas (${formatBytes(group.size * result.deleted)})`);
@@ -258,7 +258,7 @@ function renderLargeFiles(files) {
 
   container.querySelectorAll('.link-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      api.openInExplorer(btn.dataset.path);
+      sfoApi.openInExplorer(btn.dataset.path);
     });
   });
 }
@@ -288,7 +288,7 @@ $('cleanEmptyBtn').addEventListener('click', async () => {
     `Se eliminaran <strong>${cleanData.emptyFolders.length}</strong> carpetas vacias dentro de la carpeta analizada.`
   );
   if (!ok) return;
-  const result = await api.deleteEmptyFolders({ folderPath: scanData.folder });
+  const result = await sfoApi.deleteEmptyFolders({ folderPath: scanData.folder });
   result.log.forEach((l) => addHistory(l));
   showToast(`Carpetas vacias eliminadas: ${result.deleted}`);
   addHistory(`Limpieza: ${result.deleted} carpetas vacias eliminadas.`);
@@ -306,7 +306,7 @@ $('cleanTempBtn').addEventListener('click', async () => {
     `Se eliminaran <strong>${cleanData.tempFiles.length}</strong> archivos temporales (${formatBytes(size)}). Esta accion no se puede deshacer.`
   );
   if (!ok) return;
-  const result = await api.deleteTempFiles({ files: cleanData.tempFiles.map((f) => f.path) });
+  const result = await sfoApi.deleteTempFiles({ files: cleanData.tempFiles.map((f) => f.path) });
   result.log.forEach((l) => addHistory(l));
   showToast(`Temporales eliminados: ${result.deleted}`);
   addHistory(`Limpieza: ${result.deleted} archivos temporales eliminados (${formatBytes(size)})`);
@@ -330,7 +330,7 @@ async function rescan() {
   $('progressBar').style.width = '0%';
   $('progressText').textContent = 'Re-escaneando...';
   try {
-    scanData = await api.scanFolder(scanData.folder);
+    scanData = await sfoApi.scanFolder(scanData.folder);
     renderResults(scanData);
     showToast('Datos actualizados.');
   } catch (err) {
