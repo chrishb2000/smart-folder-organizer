@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Folder Organizer</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">SFO</div>
+      <div class="brand-text">
+        <h1>Smart Folder Organizer</h1>
+        <span>Organiza, limpia y protege tu espacio digital</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button id="themeToggle" class="theme-toggle" title="Cambiar tema">Modo Oscuro</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="homeView" class="view active">
+      <div class="hero-card">
+        <h2>Bienvenido</h2>
+        <p>
+          Analiza cualquier carpeta de tu equipo para clasificar archivos por tipo,
+          detectar duplicados, encontrar archivos grandes y eliminar basura. Todo se
+          procesa localmente: 100% privado y sin conexion a internet.
+        </p>
+        <button id="selectFolderBtn" class="btn btn-primary btn-large">Seleccionar Carpeta</button>
+        <div id="selectedFolder" class="selected-folder hidden"></div>
+        <div id="progressWrap" class="progress-wrap hidden">
+          <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
+          <span id="progressText">Escaneando...</span>
+        </div>
+      </div>
+
+      <div id="statsView" class="stats-view hidden">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-value" id="statFiles">0</span>
+            <span class="stat-label">Archivos</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="statFolders">0</span>
+            <span class="stat-label">Carpetas</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="statSize">0 B</span>
+            <span class="stat-label">Tamano total</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="statDupes">0</span>
+            <span class="stat-label">Duplicados</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="statWasted">0 B</span>
+            <span class="stat-label">Espacio desperdiciado</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="statDuration">0 s</span>
+            <span class="stat-label">Tiempo de analisis</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="resultsView" class="view">
+      <nav class="tabs">
+        <button class="tab active" data-tab="organize">Organizar</button>
+        <button class="tab" data-tab="duplicates">Duplicados</button>
+        <button class="tab" data-tab="large">Archivos Grandes</button>
+        <button class="tab" data-tab="clean">Limpieza</button>
+        <button class="tab" data-tab="history">Historial</button>
+      </nav>
+
+      <div id="organizeTab" class="tab-panel active">
+        <div class="panel-head">
+          <h3>Organizar archivos por categoria</h3>
+          <p class="hint">
+            Mueve los archivos de la raiz de la carpeta seleccionada a subcarpetas por
+            tipo (Imagenes, Videos, Documentos...). Selecciona las categorias y genera
+            una vista previa antes de aplicar.
+          </p>
+        </div>
+        <div id="categoryCheckboxes" class="checkbox-grid"></div>
+        <div class="panel-actions">
+          <button id="previewPlanBtn" class="btn btn-secondary">Generar vista previa</button>
+          <button id="applyPlanBtn" class="btn btn-primary" disabled>Aplicar organizacion</button>
+        </div>
+        <div id="planPreview" class="plan-preview hidden"></div>
+      </div>
+
+      <div id="duplicatesTab" class="tab-panel">
+        <div class="panel-head">
+          <h3>Archivos duplicados</h3>
+          <p class="hint">
+            Grupos de archivos con el mismo contenido (hash MD5). Puedes eliminar los
+            duplicados conservando una copia.
+          </p>
+        </div>
+        <div id="duplicateGroups" class="duplicate-groups"></div>
+      </div>
+
+      <div id="largeTab" class="tab-panel">
+        <div class="panel-head">
+          <h3>Archivos mas grandes</h3>
+          <p class="hint">Los 30 archivos de mayor tamano en la carpeta analizada.</p>
+        </div>
+        <div id="largeList" class="file-list"></div>
+      </div>
+
+      <div id="cleanTab" class="tab-panel">
+        <div class="panel-head">
+          <h3>Limpieza de la carpeta</h3>
+          <p class="hint">
+            Elimina carpetas vacias y archivos temporales (.tmp, .bak, .log, .old...)
+            para liberar espacio de forma segura.
+          </p>
+        </div>
+        <div class="clean-actions">
+          <button id="cleanEmptyBtn" class="btn btn-secondary">Eliminar carpetas vacias</button>
+          <button id="cleanTempBtn" class="btn btn-danger">Eliminar archivos temporales</button>
+        </div>
+        <div id="cleanResults" class="clean-results hidden"></div>
+      </div>
+
+      <div id="historyTab" class="tab-panel">
+        <div class="panel-head">
+          <h3>Registro de acciones</h3>
+          <p class="hint">Todas las acciones realizadas en esta sesion quedan registradas aqui.</p>
+        </div>
+        <div id="historyLog" class="history-log"></div>
+        <button id="clearHistoryBtn" class="btn btn-secondary btn-small">Limpiar registro</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>
+      Desarrollado por
+      <a href="https://christian-freelance.us/" target="_blank" rel="noopener">Christian Freelance</a>
+      &middot;
+      <a href="https://www.paypal.com/donate/?hosted_button_id=YC6YAWBQ7HNSS" target="_blank" rel="noopener">
+        Invitame a un cafe con PayPal
+      </a>
+    </span>
+  </footer>
+
+  <div id="toast" class="toast hidden"></div>
+  <div id="modal" class="modal hidden">
+    <div class="modal-box">
+      <h3 id="modalTitle"></h3>
+      <div id="modalBody"></div>
+      <div class="modal-actions">
+        <button id="modalCancel" class="btn btn-secondary">Cancelar</button>
+        <button id="modalConfirm" class="btn btn-primary">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

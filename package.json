@@ -1,0 +1,24 @@
+{
+  "name": "smart-folder-organizer",
+  "version": "1.0.0",
+  "description": "Organizador inteligente de carpetas: clasifica archivos, detecta duplicados, limpia basura y carpetas vacias. 100% local y privado.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "file-organizer",
+    "duplicate-finder",
+    "disk-cleaner",
+    "folder-manager",
+    "electron",
+    "file-management",
+    "desktop-app"
+  ],
+  "author": "Christian Herencia",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^31.2.0"
+  }
+}
