@@ -85,9 +85,13 @@
       <nav class="tabs">
         <button class="tab active" data-tab="organize">Organizar</button>
         <button class="tab" data-tab="duplicates">Duplicados</button>
+        <button class="tab" data-tab="similar">Imagenes Similares</button>
+        <button class="tab" data-tab="rename">Renombrar</button>
         <button class="tab" data-tab="large">Archivos Grandes</button>
         <button class="tab" data-tab="clean">Limpieza</button>
+        <button class="tab" data-tab="dashboard">Dashboard</button>
         <button class="tab" data-tab="history">Historial</button>
+        <button class="tab" data-tab="reports">Informes</button>
       </nav>
 
       <!-- Organizar -->
@@ -136,6 +140,44 @@
         <div id="duplicateGroups" class="duplicate-groups"></div>
       </div>
 
+      <!-- Imagenes similares -->
+      <div id="similarTab" class="tab-panel">
+        <div class="panel-head">
+          <h3>Imagenes casi-duplicadas</h3>
+          <p class="hint">
+            Detecta fotos redimensionadas, re-saved o recortadas usando hash perceptual (dHash),
+            como hacen herramientas profesionales. Todo 100% local.
+          </p>
+        </div>
+        <div class="opt-row">
+          <label>Sensibilidad (0 = exactas, 10 = muy parecidas):
+            <input type="range" id="similarThreshold" min="0" max="10" value="7" />
+            <span id="similarThresholdLabel">7</span>
+          </label>
+          <button id="analyzeSimilarBtn" class="btn btn-primary">Analizar imagenes similares</button>
+        </div>
+        <div id="similarResults" class="duplicate-groups"></div>
+      </div>
+
+      <!-- Renombrar -->
+      <div id="renameTab" class="tab-panel">
+        <div class="panel-head">
+          <h3>Renombrado masivo por lotes</h3>
+          <p class="hint">
+            Renombra cientos de archivos con patrones. Tokens: <code>{nombre}</code>,
+            <code>{nombre_limpio}</code>, <code>{fecha}</code>, <code>{anio}</code>, <code>{mes}</code>,
+            <code>{dia}</code>, <code>{mtime}</code>, <code>{carpeta}</code>, <code>{sec}</code>,
+            <code>{sec2}</code>, <code>{extension}</code>, <code>{tamano}</code>.
+          </p>
+        </div>
+        <div class="opt-row">
+          <input id="renamePattern" placeholder="Patron, ej: {fecha}_{nombre_limpio}_{sec}" class="inline-input" />
+          <button id="previewRenameBtn" class="btn btn-secondary">Vista previa</button>
+          <button id="applyRenameBtn" class="btn btn-primary" disabled>Aplicar renombrado</button>
+        </div>
+        <div id="renamePreview" class="plan-preview hidden"></div>
+      </div>
+
       <!-- Archivos grandes -->
       <div id="largeTab" class="tab-panel">
         <div class="panel-head">
@@ -163,6 +205,36 @@
           <button id="cleanTempBtn" class="btn btn-danger">Eliminar archivos temporales</button>
         </div>
         <div id="cleanResults" class="clean-results hidden"></div>
+        <div class="integrity-section">
+          <h4>Integridad de archivos</h4>
+          <div class="opt-row">
+            <label><input type="checkbox" id="integrityZip" /> Crear respaldo .zip antes de eliminar</label>
+          </div>
+          <p class="hint" id="integrityHint">Archivos cuya extension no coincide con su contenido real y archivos posiblemente corruptos.</p>
+          <div class="clean-actions">
+            <button id="deleteWrongBtn" class="btn btn-danger">Mover extensiones incorrectas a cuarentena</button>
+            <button id="deleteBrokenBtn" class="btn btn-danger">Mover archivos rotos a cuarentena</button>
+          </div>
+          <div id="integrityResults" class="clean-results hidden"></div>
+        </div>
+      </div>
+
+      <!-- Dashboard -->
+      <div id="dashboardTab" class="tab-panel">
+        <div class="panel-head">
+          <h3>Dashboard de estadisticas</h3>
+          <p class="hint">
+            Distribucion de espacio por categoria, carpetas mas pesadas, extensiones dominantes
+            e historico de archivos por mes. Busca y filtra todos los archivos analizados.
+          </p>
+        </div>
+        <div class="opt-row">
+          <input id="filterSearch" placeholder="Buscar archivo por nombre..." class="inline-input" />
+          <label>Min. tamano (KB): <input id="filterMin" type="number" value="0" min="0" class="num-input" /></label>
+          <select id="filterCategory" class="inline-select"></select>
+        </div>
+        <div id="dashCharts" class="dash-charts"></div>
+        <div id="filteredList" class="file-list"></div>
       </div>
 
       <!-- Historial -->
@@ -176,6 +248,22 @@
         </div>
         <div id="historyLog" class="history-log"></div>
         <button id="clearHistoryBtn" class="btn btn-secondary btn-small">Vaciar registro</button>
+      </div>
+
+      <!-- Informes -->
+      <div id="reportsTab" class="tab-panel">
+        <div class="panel-head">
+          <h3>Exportar informes profesionales</h3>
+          <p class="hint">
+            Genera un inventario CSV de todos los archivos analizados (con acciones de la sesion)
+            o un informe HTML visual listo para imprimir o compartir.
+          </p>
+        </div>
+        <div class="clean-actions">
+          <button id="exportCsvBtn" class="btn btn-secondary">Exportar informe CSV</button>
+          <button id="exportHtmlBtn" class="btn btn-secondary">Exportar informe HTML</button>
+        </div>
+        <div id="reportResult" class="clean-results hidden"></div>
       </div>
     </section>
   </main>

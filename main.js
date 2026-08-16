@@ -4,12 +4,17 @@ const fs = require('fs');
 const { spawn } = require('child_process');
 const { scanFolderSync, buildCategories, findDuplicates } = require('./lib/scanner');
 const { buildOrganizePlan } = require('./lib/planner');
+const { findSimilarGroups } = require('./lib/imghash');
+const { buildRenamePlan, applyRenamePlan } = require('./lib/renamer');
+const { buildReport, buildActionCsv, buildHtmlReport, saveReport } = require('./lib/reporter');
+const { computeDashboard } = require('./lib/stats');
+const { extractMetadata } = require('./lib/exif');
 
 let mainWindow;
 let userDataDir;
 let quarantineDir;
 let dataFile;
-let store = { rules: [], undo: [] };
+let store = { rules: [], undo: [], hashCache: {} };
 
 /* ---------- Persistencia ---------- */
 function ensureDirs() {
@@ -24,10 +29,11 @@ function loadStore() {
     const parsed = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
     store = {
       rules: Array.isArray(parsed.rules) ? parsed.rules : [],
-      undo: Array.isArray(parsed.undo) ? parsed.undo : []
+      undo: Array.isArray(parsed.undo) ? parsed.undo : [],
+      hashCache: parsed.hashCache && typeof parsed.hashCache === 'object' ? parsed.hashCache : {}
     };
   } catch (e) {
-    store = { rules: [], undo: [] };
+    store = { rules: [], undo: [], hashCache: {} };
   }
 }
 
@@ -96,7 +102,8 @@ function createWindow() {
   });
 
   mainWindow.setMenuBarVisibility(false);
-  mainWindow.loadFile(path.join(__dirname, 'index.html'));
+  const loadOptions = process.env.SFO_E2E ? { query: { e2e: '1' } } : undefined;
+  mainWindow.loadFile(path.join(__dirname, 'index.html'), loadOptions);
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.maximize();
@@ -138,34 +145,47 @@ ipcMain.handle('scan-folders', async (event, { folders, customRules }) => {
     files: [],
     emptyFolders: [],
     tempFiles: [],
+    wrongExtensions: [],
+    brokenFiles: [],
     topLevelFiles: [],
     categories: [],
     largeFiles: [],
     duplicateGroups: [],
-    duplicateWasted: 0
+    duplicateWasted: 0,
+    dashboard: null
   };
   const startAll = Date.now();
+  const cache = store.hashCache || {};
 
   for (const folder of folders) {
     const scan = scanFolderSync(folder, customRules, (scanned, current) => {
       event.sender.send('scan-progress', { scanned, folder, current });
-    });
+    }, { checkIntegrity: true });
     result.totalFiles += scan.totalFiles;
     result.totalFolders += scan.totalFolders;
     result.totalSize += scan.totalSize;
     result.files.push(...scan.files);
     result.emptyFolders.push(...scan.emptyFolders);
     result.tempFiles.push(...scan.tempFiles);
+    result.wrongExtensions.push(...scan.wrongExtensions);
+    result.brokenFiles.push(...scan.brokenFiles);
     result.topLevelFiles.push(...scan.files.filter((f) => path.dirname(f.path) === folder));
   }
 
   event.sender.send('scan-progress', { scanned: result.totalFiles, current: 'Comparando hashes para detectar duplicados...' });
-  const groups = await findDuplicates(result.files);
-  result.duplicateGroups = groups;
-  result.duplicateWasted = groups.reduce((s, g) => s + g.size * (g.files.length - 1), 0);
+  const dupResult = await findDuplicates(result.files, null, cache);
+  store.hashCache = dupResult.cache;
+  if (Object.keys(store.hashCache).length > 250000) {
+    const keys = Object.keys(store.hashCache);
+    for (const k of keys.slice(0, keys.length - 250000)) delete store.hashCache[k];
+  }
+  saveStore();
+  result.duplicateGroups = dupResult.groups;
+  result.duplicateWasted = dupResult.groups.reduce((s, g) => s + g.size * (g.files.length - 1), 0);
   result.categories = buildCategories(result.files);
   result.largeFiles = [...result.files].sort((a, b) => b.size - a.size).slice(0, 30);
   result.scanDuration = Date.now() - startAll;
+  result.dashboard = computeDashboard(result);
 
   return result;
 });
@@ -303,6 +323,15 @@ ipcMain.handle('undo-record', (event, id) => {
           log.push(`No se encontro el archivo: ${e.to}`);
         }
       }
+    } else if (rec.type === 'rename') {
+      for (const e of rec.entries) {
+        if (fs.existsSync(e.to)) {
+          fs.renameSync(e.to, e.from);
+          log.push(`Renombrado restaurado: ${path.basename(e.from)}`);
+        } else {
+          log.push(`No se encontro: ${e.to}`);
+        }
+      }
     } else if (rec.type === 'rmdir') {
       for (const d of rec.dirs) {
         try {
@@ -356,6 +385,56 @@ ipcMain.handle('get-thumbnails', async (event, paths) => {
     }
   }
   return result;
+});
+
+/* ---------- IPC: imagenes similares ---------- */
+ipcMain.handle('analyze-similar-images', async (event, { files, threshold, maxFiles }) => {
+  event.sender.send('scan-progress', { scanned: 0, current: 'Analizando imagenes similares (hash perceptual)...' });
+  const groups = findSimilarGroups(files || [], { threshold, maxFiles });
+  return { groups };
+});
+
+/* ---------- IPC: renombrado masivo ---------- */
+ipcMain.handle('preview-rename', (event, { files, pattern }) => {
+  const plan = buildRenamePlan(files || [], pattern, { seqZero: true });
+  return { success: true, plan };
+});
+
+ipcMain.handle('apply-rename', (event, { plan }) => {
+  const entries = [];
+  const result = applyRenamePlan(plan, (item) => entries.push(item));
+  if (result.renamed > 0) {
+    addUndoRecord({ type: 'rename', label: `Renombrar ${result.renamed} archivos`, entries });
+  }
+  return result;
+});
+
+/* ---------- IPC: informes ---------- */
+ipcMain.handle('export-report', async (event, { scanData, format, actions }) => {
+  const defaultPath = scanData.folders && scanData.folders[0]
+    ? path.join(scanData.folders[0], `Informe_SmartFolderOrganizer.${format}`)
+    : `Informe_SmartFolderOrganizer.${format}`;
+  const dialogResult = await dialog.showSaveDialog(mainWindow, {
+    title: 'Guardar informe',
+    defaultPath,
+    filters: [{ name: format.toUpperCase(), extensions: [format] }]
+  });
+  if (dialogResult.canceled || !dialogResult.filePath) return { success: false, canceled: true };
+  let content;
+  if (format === 'html') {
+    content = buildHtmlReport(scanData, `Analisis de ${scanData.totalFiles} archivos (${new Date().toLocaleString()})`);
+  } else {
+    const rep = buildReport(scanData);
+    const actionCsv = buildActionCsv(actions || []);
+    content = rep.csv + '\r\n\r\n=== ACCIONES ===\r\n' + actionCsv;
+  }
+  fs.writeFileSync(dialogResult.filePath, content, 'utf8');
+  return { success: true, filePath: dialogResult.filePath };
+});
+
+/* ---------- IPC: metadatos de imagen (EXIF) ---------- */
+ipcMain.handle('get-file-metadata', (event, filePath) => {
+  return extractMetadata(filePath);
 });
 
 /* ---------- IPC: misc ---------- */

@@ -1,6 +1,6 @@
 # Smart Folder Organizer 🗂️
 
-> Aplicación de escritorio inteligente que organiza varias carpetas a la vez, detecta archivos duplicados, organiza por fecha, aplica reglas personalizadas, crea respaldos .zip y más. **100% local, 100% privado y sin conexión a internet.**
+> Aplicación de escritorio inteligente que organiza varias carpetas a la vez, detecta archivos duplicados e **imágenes casi-duplicadas**, verifica la integridad de los archivos, renombra en lote, genera informes profesionales y más. **100% local, 100% privado y sin conexión a internet.**
 
 [![Electron](https://img.shields.io/badge/Electron-31-blue.svg)](https://www.electronjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
@@ -22,19 +22,24 @@ Para utilizar **Smart Folder Organizer** en tu ordenador, únicamente necesitas:
 
 ## 🖥️ Características de la Aplicación de Escritorio
 
-- **🗂️ Multi-Carpeta (Cola de Análisis)**: Añade tantas carpetas como quieras (Descargas, Escritorio, Documentos...) y escanea todas en lote con barra de progreso y estado por carpeta.
-- **📁 Organizador Inteligente por Categorías**: Clasifica y mueve archivos a subcarpetas por tipo: **Imágenes, Vídeos, Audios, Documentos, Instaladores, Comprimidos, Código y Otros**. Con **vista previa antes de aplicar** y resolución automática de conflictos de nombres.
-- **📅 Organización por Fecha**: Detecta la fecha del nombre del archivo (ej. `2024-05-12_factura.pdf`) o la fecha de modificación y organiza en `Año/Mes` automáticamente.
-- **⚙️ Reglas Personalizadas**: Crea tus propias reglas (carpeta destino + extensiones) directamente desde la interfaz. Se guardan y se aplican en todos los análisis.
-- **🖼️ Vista Previa de Imágenes**: Las miniaturas de fotos y capturas se generan en tiempo real dentro del plan de organización para que veas qué vas a mover.
-- **🔄 Detector de Duplicados por Hash MD5**: Compara el contenido real de los archivos y agrupa las copias idénticas. Elimina las copias extra conservando la original, **con opción de moverlas a la papelera o borrarlas de forma segura**.
-- **🔙 Deshacer (Cuarentena)**: Cada movimiento o eliminación puede revertirse desde el historial. Los archivos eliminados viajan a una **cuarentena** de la que puedes restaurarlos.
-- **🗜️ Respaldo .zip Automático**: Antes de organizar o eliminar, crea un respaldo comprimido de los archivos afectados para total tranquilidad.
-- **📊 Gráfico de Distribución de Espacio**: Visualiza en un gráfico circular cuánto espacio ocupa cada categoría y la suma total del análisis.
-- **🧹 Modo Limpieza Seguro**: Elimina carpetas vacías y archivos temporales (`.tmp`, `.bak`, `.log`, `.old`, `.crdownload`...) con confirmación previa.
-- **🛡️ Seguridad Total**: Todo el análisis se ejecuta **localmente en tu equipo**. Ningún archivo sale de tu ordenador. Sin cuentas, sin nubes, sin anuncios.
-- **🌓 Tema Dual (Claro / Oscuro)**: Conmutador instantáneo en la barra superior con persistencia de preferencia.
-- **🖥️ Ventana Maximizada y Limpia**: Se abre a pantalla completa por defecto, libre de menús nativos (`File`, `Edit`, `View`...).
+- **🖼️ Imágenes Casi-Duplicadas (hash perceptual)**: Detecta fotos redimensionadas, re-saved o recortadas que los buscadores de duplicados clásicos (por hash MD5) no ven. Como Czkawka o dupeGuru, pero con una interfaz más moderna. Incluye sensibilidad ajustable (0 = exactas, 10 = muy parecidas).
+- **✏️ Renombrado Masivo por Lotes**: Renombra cientos de archivos con patrones profesionales: `{fecha}`, `{nombre_limpio}`, `{sec}`, `{sec2}`, `{anio}`, `{mes}`, `{dia}`, `{carpeta}`, `{mtime}`, `{tamano}`... con vista previa antes de aplicar y deshacer desde el historial.
+- **🔍 Verificación de Integridad**: Detecta **extensiones incorrectas** (el contenido real no coincide con la extensión, ej. un PDF renombrado a .png) y **archivos rotos/corruptos** (PNG/JPEG/PDF/GIF truncados) usando firma de bytes (magic numbers).
+- **📊 Dashboard de Estadísticas**: Gráfico circular de categorías, top extensiones, carpetas más pesadas, distribución por tamaño, histograma de archivos por mes y **buscador/filtros en vivo** (nombre, tamaño mínimo, categoría) sobre todos los archivos analizados.
+- **📄 Informes Profesionales (CSV/HTML)**: Exporta un inventario completo de los archivos analizados más la auditoría de acciones de la sesión. El informe HTML es visual y listo para imprimir o compartir.
+- **🏃 Caché de Hashes Inteligente**: Los hashes MD5 se guardan entre análisis. Re-escanea la misma carpeta y la detección de duplicados es mucho más rápida.
+- **📸 Metadatos EXIF**: La vista previa de imágenes muestra dimensiones, fecha de captura y cámara (modelo) extraídas localmente.
+- **🗂️ Multi-Carpeta (Cola de Análisis)**: Añade tantas carpetas como quieras y escanea todas en lote con barra de progreso.
+- **📁 Organizador Inteligente por Categorías**: Clasifica y mueve archivos a subcarpetas por tipo: **Imágenes, Vídeos, Audios, Documentos, Instaladores, Comprimidos, Código y Otros**, con **vista previa con miniaturas y metadatos** antes de aplicar.
+- **📅 Organización por Fecha**: Organiza en `Año/Mes` usando la fecha del nombre o la fecha de modificación.
+- **⚙️ Reglas Personalizadas**: Crea tus propias reglas (carpeta destino + extensiones) desde la interfaz. Se guardan y se aplican en todos los análisis.
+- **🔄 Detector de Duplicados por Hash MD5**: Compara el contenido real de los archivos y agrupa las copias idénticas, con opción de **papelera o borrado seguro**.
+- **🔙 Deshacer (Cuarentena)**: Cada movimiento, renombrado o eliminación puede revertirse desde el historial.
+- **🗜️ Respaldo .zip Automático**: Antes de organizar o eliminar, crea un respaldo comprimido de los archivos afectados.
+- **🧹 Modo Limpieza Seguro**: Elimina carpetas vacías y archivos temporales (`.tmp`, `.bak`, `.log`, `.old`, `.crdownload`...).
+- **🛡️ Seguridad Total**: Todo el análisis se ejecuta **localmente en tu equipo**. Sin cuentas, sin nubes, sin anuncios.
+- **🌓 Tema Dual (Claro / Oscuro)**: Conmutador instantáneo con persistencia de preferencia.
+- **🖥️ Ventana Maximizada y Limpia**: Libre de menús nativos (`File`, `Edit`, `View`...).
 
 ---
 
@@ -50,8 +55,8 @@ npm run dist
 ```
 
 Se generarán en la carpeta `dist/`:
-- `SmartFolderOrganizer_2.0.0_portable.exe` → **versión portable**, sin instalación, lista para usar o llevar en un USB.
-- `SmartFolderOrganizer_Setup_2.0.0.exe` → **instalador** que instala la app con acceso directo en el menú Inicio.
+- `SmartFolderOrganizer_3.0.0_portable.exe` → **versión portable**, sin instalación, lista para usar o llevar en un USB.
+- `SmartFolderOrganizer_Setup_3.0.0.exe` → **instalador** que instala la app con acceso directo en el menú Inicio.
 
 > ⚠️ Nota de compilación: en Windows, la extracción del empaquetador requiere **Modo Desarrollador** o permisos de administrador para crear enlaces simbólicos. Si tu máquina no lo permite, usa la Opción 2 (100% funcional).
 
@@ -75,11 +80,15 @@ npm start
 1. **Inicia la aplicación** con el `.exe` instalado o con `run-organizer.bat` (1 clic).
 2. Pulsa **"Añadir Carpeta"** para elegir las carpetas que quieres analizar (puedes añadir varias).
 3. Espera a que termine el análisis (verás el progreso y el gráfico de espacio en tiempo real).
-4. En **Organizar**: elige categorías, reglas personalizadas y si quieres organizar por fecha o auto-renombrar. Genera la vista previa (con miniaturas de imágenes) y aplica.
-5. En **Duplicados**: revisa los grupos de archivos idénticos y elimina las copias extra (a papelera o borrado seguro).
-6. En **Limpieza**: borra carpetas vacías y archivos temporales.
-7. En **Historial**: consulta todas las acciones, **deshaz** cualquier movimiento o restaura archivos desde la cuarentena.
-8. Activa la casilla **"Crear respaldo .zip"** para generar un comprimido de seguridad antes de cada acción destructiva.
+4. En **Organizar**: elige categorías, reglas personalizadas y si quieres organizar por fecha o auto-renombrar. Genera la vista previa (con miniaturas y metadatos EXIF) y aplica.
+5. En **Imagenes Similares**: ajusta la sensibilidad y busca fotos casi-duplicadas (redimensionadas, re-saved, recortadas).
+6. En **Renombrar**: escribe un patrón con tokens (ej. `{fecha}_{nombre_limpio}_{sec}`), genera la vista previa y aplica.
+7. En **Duplicados**: revisa los grupos de archivos idénticos y elimina las copias extra (a papelera o borrado seguro).
+8. En **Limpieza**: borra carpetas vacías, archivos temporales, **extensiones incorrectas** y **archivos rotos**.
+9. En **Dashboard**: explora las estadísticas avanzadas y busca/filtra archivos en vivo.
+10. En **Informes**: exporta el inventario completo en CSV o HTML.
+11. En **Historial**: consulta todas las acciones, **deshaz** movimientos/renombrados o restaura archivos desde la cuarentena.
+12. Activa la casilla **"Crear respaldo .zip"** para generar un comprimido de seguridad antes de cada acción destructiva.
 
 > ⚠️ **Consejo de seguridad**: la aplicación siempre te pide confirmación antes de mover o eliminar archivos. Revisa las vistas previas antes de aplicar cualquier acción.
 
@@ -104,16 +113,20 @@ npm run test:e2e
 
 ```
 smart-folder-organizer/
-├── main.js               # Proceso principal de Electron (IPC, cuarentena, respaldos, miniaturas)
+├── main.js               # Proceso principal de Electron (IPC, cuarentena, respaldos, miniaturas, informes)
 ├── preload.js            # Puente seguro entre el frontend y Electron
 ├── renderer.js           # Lógica de la interfaz de usuario
 ├── index.html            # Estructura de la interfaz
 ├── styles.css            # Estilos con tema claro/oscuro
-├── lib/scanner.js        # Motor de escaneo, categorización y detección de duplicados
+├── lib/scanner.js        # Motor de escaneo, categorías, duplicados (con caché) y verificación de integridad
 ├── lib/planner.js        # Planificador de organización (categorías, fechas, renombrado)
-├── test/scanner.test.js  # Pruebas del escáner
-├── test/planner.test.js  # Pruebas del planificador
-├── test/e2e.smoke.js     # Prueba de interfaz completa (E2E)
+├── lib/imghash.js        # Hash perceptual (dHash) para imágenes casi-duplicadas
+├── lib/renamer.js        # Renombrado masivo con tokens y vista previa
+├── lib/signatures.js     # Magic bytes: extensiones incorrectas y archivos rotos
+├── lib/stats.js          # Estadísticas avanzadas del dashboard
+├── lib/reporter.js       # Informes CSV/HTML profesionales
+├── lib/exif.js           # Metadatos EXIF de imágenes
+├── test/                 # Tests unitarios de cada módulo + test de interfaz (E2E)
 ├── build/icon.ico        # Icono de la aplicación para los ejecutables
 ├── scripts/make-icon.js  # Generador del icono (PNG + ICO multi-tamaño)
 ├── run-organizer.bat     # Ejecutable de 1-clic para Windows

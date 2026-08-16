@@ -13,6 +13,11 @@ contextBridge.exposeInMainWorld('api', {
   getUndo: () => ipcRenderer.invoke('get-undo'),
   undoRecord: (id) => ipcRenderer.invoke('undo-record', id),
   getThumbnails: (paths) => ipcRenderer.invoke('get-thumbnails', paths),
+  analyzeSimilarImages: (payload) => ipcRenderer.invoke('analyze-similar-images', payload),
+  previewRename: (payload) => ipcRenderer.invoke('preview-rename', payload),
+  applyRename: (payload) => ipcRenderer.invoke('apply-rename', payload),
+  exportReport: (payload) => ipcRenderer.invoke('export-report', payload),
+  getFileMetadata: (filePath) => ipcRenderer.invoke('get-file-metadata', filePath),
   openInExplorer: (filePath) => ipcRenderer.invoke('open-in-explorer', filePath),
   onScanProgress: (callback) => ipcRenderer.on('scan-progress', (_event, data) => callback(data))
 });

@@ -1,11 +1,11 @@
 {
   "name": "smart-folder-organizer",
-  "version": "2.0.0",
-  "description": "Organizador inteligente de carpetas: clasifica archivos, detecta duplicados, limpia basura y carpetas vacias. 100% local y privado.",
+  "version": "3.0.0",
+  "description": "Organizador inteligente de carpetas: clasifica archivos, detecta duplicados, imagenes similares, extensiones incorrectas, archivos rotos, renombra en lote y exporta informes. 100% local y privado.",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "test": "node test/scanner.test.js && node test/planner.test.js",
+    "test": "node test/scanner.test.js && node test/planner.test.js && node test/imghash.test.js && node test/renamer.test.js && node test/signatures.test.js && node test/stats.test.js && node test/reporter.test.js",
     "test:e2e": "electron test/e2e.smoke.js",
     "dist": "electron-builder --win",
     "dist:portable": "electron-builder --win portable"
@@ -40,8 +40,18 @@
     "win": {
       "icon": "build/icon.ico",
       "target": [
-        { "target": "portable", "arch": ["x64"] },
-        { "target": "nsis", "arch": ["x64"] }
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
       ]
     },
     "portable": {
@@ -52,5 +62,10 @@
       "perMachine": false,
       "artifactName": "SmartFolderOrganizer_Setup_${version}.exe"
     }
+  },
+  "dependencies": {
+    "exif-parser": "^0.1.12",
+    "jpeg-js": "^0.4.4",
+    "pngjs": "^7.0.0"
   }
 }
