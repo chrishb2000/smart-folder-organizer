@@ -22,16 +22,24 @@
   </header>
 
   <main class="container">
+    <!-- ===================== VISTA INICIO ===================== -->
     <section id="homeView" class="view active">
       <div class="hero-card">
         <h2>Bienvenido</h2>
         <p>
-          Analiza cualquier carpeta de tu equipo para clasificar archivos por tipo,
-          detectar duplicados, encontrar archivos grandes y eliminar basura. Todo se
-          procesa localmente: 100% privado y sin conexion a internet.
+          Analiza una o varias carpetas de tu equipo para clasificar archivos por tipo,
+          detectar duplicados, encontrar archivos grandes y limpiar basura.
+          Todo se procesa localmente: 100% privado y sin conexion a internet.
         </p>
-        <button id="selectFolderBtn" class="btn btn-primary btn-large">Seleccionar Carpeta</button>
-        <div id="selectedFolder" class="selected-folder hidden"></div>
+
+        <div class="folder-queue">
+          <div id="folderQueue" class="folder-chips"></div>
+          <div class="queue-actions">
+            <button id="addFolderBtn" class="btn btn-secondary">+ Anadir carpeta</button>
+            <button id="scanBtn" class="btn btn-primary">Analizar ahora</button>
+          </div>
+        </div>
+
         <div id="progressWrap" class="progress-wrap hidden">
           <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
           <span id="progressText">Escaneando...</span>
@@ -54,7 +62,7 @@
           </div>
           <div class="stat-card">
             <span class="stat-value" id="statDupes">0</span>
-            <span class="stat-label">Duplicados</span>
+            <span class="stat-label">Grupos duplicados</span>
           </div>
           <div class="stat-card">
             <span class="stat-value" id="statWasted">0 B</span>
@@ -65,9 +73,14 @@
             <span class="stat-label">Tiempo de analisis</span>
           </div>
         </div>
+        <div class="chart-wrap">
+          <canvas id="pieChart" width="420" height="240"></canvas>
+          <div id="chartLegend" class="chart-legend"></div>
+        </div>
       </div>
     </section>
 
+    <!-- ===================== VISTA RESULTADOS ===================== -->
     <section id="resultsView" class="view">
       <nav class="tabs">
         <button class="tab active" data-tab="organize">Organizar</button>
@@ -77,16 +90,29 @@
         <button class="tab" data-tab="history">Historial</button>
       </nav>
 
+      <!-- Organizar -->
       <div id="organizeTab" class="tab-panel active">
         <div class="panel-head">
           <h3>Organizar archivos por categoria</h3>
           <p class="hint">
-            Mueve los archivos de la raiz de la carpeta seleccionada a subcarpetas por
-            tipo (Imagenes, Videos, Documentos...). Selecciona las categorias y genera
-            una vista previa antes de aplicar.
+            Mueve los archivos de la raiz de las carpetas analizadas a subcarpetas por tipo.
+            Selecciona categorias y genera una vista previa antes de aplicar.
           </p>
         </div>
         <div id="categoryCheckboxes" class="checkbox-grid"></div>
+        <div class="opt-row">
+          <label><input type="checkbox" id="optByDate" /> Organizar por fecha (carpeta ano/mes)</label>
+          <label><input type="checkbox" id="optRename" /> Renombrar con fecha detectada en el nombre</label>
+        </div>
+        <div class="rules-section">
+          <h4>Reglas personalizadas (prioridad sobre las categorias)</h4>
+          <div class="rule-form">
+            <input id="ruleFolder" placeholder="Carpeta destino, ej: Facturas" />
+            <input id="ruleExts" placeholder="Extensiones, ej: pdf, xlsx" />
+            <button id="addRuleBtn" class="btn btn-secondary">Añadir regla</button>
+          </div>
+          <div id="ruleList" class="rule-list"></div>
+        </div>
         <div class="panel-actions">
           <button id="previewPlanBtn" class="btn btn-secondary">Generar vista previa</button>
           <button id="applyPlanBtn" class="btn btn-primary" disabled>Aplicar organizacion</button>
@@ -94,32 +120,43 @@
         <div id="planPreview" class="plan-preview hidden"></div>
       </div>
 
+      <!-- Duplicados -->
       <div id="duplicatesTab" class="tab-panel">
         <div class="panel-head">
           <h3>Archivos duplicados</h3>
           <p class="hint">
-            Grupos de archivos con el mismo contenido (hash MD5). Puedes eliminar los
-            duplicados conservando una copia.
+            Grupos de archivos con el mismo contenido (hash MD5). Elimina las copias
+            conservando una copia. Usa el modo seguro para poder restaurarlas.
           </p>
+        </div>
+        <div class="opt-row">
+          <label><input type="checkbox" id="dupSecure" checked /> Modo seguro: mover a cuarentena (restaurable)</label>
+          <label><input type="checkbox" id="dupZip" /> Crear respaldo .zip antes de eliminar</label>
         </div>
         <div id="duplicateGroups" class="duplicate-groups"></div>
       </div>
 
+      <!-- Archivos grandes -->
       <div id="largeTab" class="tab-panel">
         <div class="panel-head">
           <h3>Archivos mas grandes</h3>
-          <p class="hint">Los 30 archivos de mayor tamano en la carpeta analizada.</p>
+          <p class="hint">Los 30 archivos de mayor tamano en las carpetas analizadas.</p>
         </div>
         <div id="largeList" class="file-list"></div>
       </div>
 
+      <!-- Limpieza -->
       <div id="cleanTab" class="tab-panel">
         <div class="panel-head">
-          <h3>Limpieza de la carpeta</h3>
+          <h3>Limpieza de carpetas</h3>
           <p class="hint">
             Elimina carpetas vacias y archivos temporales (.tmp, .bak, .log, .old...)
             para liberar espacio de forma segura.
           </p>
+        </div>
+        <div class="opt-row">
+          <label><input type="checkbox" id="cleanSecure" checked /> Modo seguro: mover a cuarentena (restaurable)</label>
+          <label><input type="checkbox" id="cleanZip" /> Crear respaldo .zip antes de eliminar</label>
         </div>
         <div class="clean-actions">
           <button id="cleanEmptyBtn" class="btn btn-secondary">Eliminar carpetas vacias</button>
@@ -128,13 +165,17 @@
         <div id="cleanResults" class="clean-results hidden"></div>
       </div>
 
+      <!-- Historial -->
       <div id="historyTab" class="tab-panel">
         <div class="panel-head">
-          <h3>Registro de acciones</h3>
-          <p class="hint">Todas las acciones realizadas en esta sesion quedan registradas aqui.</p>
+          <h3>Registro de acciones y deshacer</h3>
+          <p class="hint">
+            Cada accion queda registrada. Las acciones con cuarentena o movimientos pueden
+            restaurarse pulsando &quot;Restaurar&quot;.
+          </p>
         </div>
         <div id="historyLog" class="history-log"></div>
-        <button id="clearHistoryBtn" class="btn btn-secondary btn-small">Limpiar registro</button>
+        <button id="clearHistoryBtn" class="btn btn-secondary btn-small">Vaciar registro</button>
       </div>
     </section>
   </main>

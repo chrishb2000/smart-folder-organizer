@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { scanFolderSync, buildCategories, findDuplicates } = require('../lib/scanner');
+const { scanFolderSync, buildCategories, findDuplicates, getCategory } = require('../lib/scanner');
 
 async function main() {
   const testDir = path.join(__dirname, '_test_scan');
@@ -24,38 +24,31 @@ async function main() {
   fs.mkdirSync(path.join(testDir, 'empty_dir'));
   fs.mkdirSync(path.join(testDir, 'sub', 'nested_empty'));
 
-  const scan = scanFolderSync(testDir);
+  const scan = scanFolderSync(testDir, null);
   console.log('== SCAN ==');
   console.log('totalFiles:', scan.totalFiles);
-  console.log('totalFolders:', scan.totalFolders);
   console.log('emptyFolders:', scan.emptyFolders.length, scan.emptyFolders.map((p) => path.basename(p)));
   console.log('tempFiles:', scan.tempFiles.map((f) => f.name));
-  console.log('categories:', buildCategories(scan.files).map((c) => `${c.name}=${c.count}`).join(', '));
 
   const dupes = await findDuplicates(scan.files);
-  console.log('== DUPLICATES ==');
-  console.log('groups:', dupes.length);
-  for (const g of dupes) {
-    console.log('  size:', g.size, 'files:', g.files.map((f) => f.name).join(', '));
-  }
+  console.log('duplicate groups:', dupes.length);
 
-  if (dupes.length !== 1) {
-    console.error(`FAIL: se esperaba 1 grupo duplicado, se obtuvieron ${dupes.length}`);
-    process.exit(1);
-  }
-
-  const dupNames = dupes.flatMap((g) => g.files.map((f) => f.name));
   const check = (name, cond) => {
     if (cond) console.log(`PASS: ${name}`);
     else { console.error(`FAIL: ${name}`); process.exit(1); }
   };
-  check('duplicados detectados (foto1,foto2,copia)', dupNames.includes('foto1.jpg') && dupNames.includes('copia_duplicada.jpg'));
+
+  check('1 grupo duplicado (3 archivos identicos)', dupes.length === 1 && dupes[0].files.length === 3);
   check('categorias correctas', scan.files.some((f) => f.category === 'Documentos' && f.name === 'documento.pdf'));
   check('temporal detectado', scan.tempFiles.some((f) => f.name === 'basura.tmp'));
-  check('carpetas vacias detectadas', scan.emptyFolders.some((f) => path.basename(f) === 'empty_dir') && scan.emptyFolders.some((f) => path.basename(f) === 'nested_empty'));
+  check('carpetas vacias detectadas', scan.emptyFolders.length === 2);
+
+  const customRules = [{ folder: 'Facturas', exts: ['.pdf', '.xlsx'] }];
+  check('regla personalizada prioritaria', getCategory('doc.pdf', customRules) === 'Facturas');
+  check('regla personalizada no rompe defaults', getCategory('img.jpg', customRules) === 'Imagenes');
 
   fs.rmSync(testDir, { recursive: true, force: true });
-  console.log('\nALL TESTS PASSED');
+  console.log('\nSCANNER TESTS PASSED');
   process.exit(0);
 }
 

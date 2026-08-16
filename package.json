@@ -1,11 +1,14 @@
 {
   "name": "smart-folder-organizer",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Organizador inteligente de carpetas: clasifica archivos, detecta duplicados, limpia basura y carpetas vacias. 100% local y privado.",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test/scanner.test.js && node test/planner.test.js",
+    "test:e2e": "electron test/e2e.smoke.js",
+    "dist": "electron-builder --win",
+    "dist:portable": "electron-builder --win portable"
   },
   "keywords": [
     "file-organizer",
@@ -19,6 +22,35 @@
   "author": "Christian Herencia",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^31.2.0"
+    "electron": "^31.2.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.christianfreelance.smartfolderorganizer",
+    "productName": "Smart Folder Organizer",
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer.js",
+      "index.html",
+      "styles.css",
+      "lib/**/*",
+      "package.json"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        { "target": "portable", "arch": ["x64"] },
+        { "target": "nsis", "arch": ["x64"] }
+      ]
+    },
+    "portable": {
+      "artifactName": "SmartFolderOrganizer_${version}_portable.exe"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "artifactName": "SmartFolderOrganizer_Setup_${version}.exe"
+    }
   }
 }

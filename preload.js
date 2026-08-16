@@ -2,12 +2,17 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
   selectFolder: () => ipcRenderer.invoke('select-folder'),
-  scanFolder: (folderPath) => ipcRenderer.invoke('scan-folder', folderPath),
+  scanFolders: (payload) => ipcRenderer.invoke('scan-folders', payload),
   buildOrganizePlan: (payload) => ipcRenderer.invoke('build-organize-plan', payload),
   applyOrganizePlan: (payload) => ipcRenderer.invoke('apply-organize-plan', payload),
   deleteEmptyFolders: (payload) => ipcRenderer.invoke('delete-empty-folders', payload),
   deleteTempFiles: (payload) => ipcRenderer.invoke('delete-temp-files', payload),
   deleteDuplicates: (payload) => ipcRenderer.invoke('delete-duplicates', payload),
+  getRules: () => ipcRenderer.invoke('get-rules'),
+  saveRules: (rules) => ipcRenderer.invoke('save-rules', rules),
+  getUndo: () => ipcRenderer.invoke('get-undo'),
+  undoRecord: (id) => ipcRenderer.invoke('undo-record', id),
+  getThumbnails: (paths) => ipcRenderer.invoke('get-thumbnails', paths),
   openInExplorer: (filePath) => ipcRenderer.invoke('open-in-explorer', filePath),
   onScanProgress: (callback) => ipcRenderer.on('scan-progress', (_event, data) => callback(data))
 });
