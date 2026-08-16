@@ -121,6 +121,19 @@ app.on('browser-window-created', (_e, win) => {
         const exp = await window.api.exportReport({ scanData: scan, format: 'csv', actions: [] });
         out.reportSaved = exp.success;
 
+        // --- Nueva organizacion (volver al inicio sin cerrar la ventana) ---
+        const newBtn = document.getElementById('newOrgBtn');
+        out.hasNewBtn = !!newBtn;
+        if (newBtn) {
+          document.getElementById('homeView').classList.remove('active');
+          document.getElementById('resultsView').classList.add('active');
+          newBtn.click();
+          await new Promise(r=>setTimeout(r,120));
+          out.afterNewHome = document.getElementById('homeView').classList.contains('active');
+          out.afterNewResults = document.getElementById('resultsView').classList.contains('active');
+          out.folderQueueCleared = document.getElementById('folderQueue').textContent.indexOf('No has anadido') !== -1;
+        }
+
         return out;
       })()`;
       const result = await win.webContents.executeJavaScript(script);
@@ -168,6 +181,9 @@ app.on('browser-window-created', (_e, win) => {
       if (!result.trashUndoSuccess) errors.push('trash-undo-failed');
       if (!zipCheck) errors.push('zip-not-valid');
       if (!result.reportSaved || !csvReport) errors.push('report-export-failed');
+      if (!result.hasNewBtn) errors.push('new-btn-missing');
+      if (!result.afterNewHome || result.afterNewResults) errors.push('new-org-navigation-failed');
+      if (!result.folderQueueCleared) errors.push('folder-queue-not-cleared');
 
       if (errors.length === 0) console.log('E2E: ALL PASSED');
       else console.log('E2E: FAILURES ' + JSON.stringify(errors));

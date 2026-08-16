@@ -4,7 +4,6 @@ const CATEGORY_ORDER = ['Imagenes', 'Videos', 'Audios', 'Documentos', 'Instalado
 
 let folders = [];
 let scanData = null;
-let currentPlan = null;
 let customRules = [];
 let sessionHistory = [];
 let undoRecords = [];
@@ -219,7 +218,7 @@ function renderCategories(categories) {
   }
 }
 
-$('previewPlanBtn').addEventListener('click', async () => {
+$('applyOrganizeBtn').addEventListener('click', async () => {
   if (!scanData) return;
   const includeCategories = Array.from(document.querySelectorAll('.cat-check:checked')).map((el) => el.value);
   const result = await sfoApi.buildOrganizePlan({
@@ -229,58 +228,46 @@ $('previewPlanBtn').addEventListener('click', async () => {
     autoRename: $('optRename').checked,
     customRules
   });
-  const preview = $('planPreview');
-  if (!result.success || result.plan.length === 0) {
-    preview.innerHTML = '<h4>Vista previa</h4><p class="hint">No hay archivos que mover con las opciones seleccionadas.</p>';
-    preview.classList.remove('hidden');
-    $('applyPlanBtn').disabled = true;
-    currentPlan = null;
+  if (!result.success) {
+    showToast('Error al generar el plan: ' + (result.error || 'desconocido'));
     return;
   }
-  const imageItems = result.plan.filter((item) => isImagePath(item.source)).slice(0, 60);
-  const thumbs = await sfoApi.getThumbnails(imageItems.map((i) => i.source));
-  const metas = {};
-  for (const i of imageItems.slice(0, 15)) {
-    try { metas[i.source] = await sfoApi.getFileMetadata(i.source); } catch (e) { metas[i.source] = null; }
+  if (result.plan.length === 0) {
+    showToast('No hay archivos que mover con las opciones seleccionadas.');
+    return;
   }
-  const thumbMap = {};
-  imageItems.forEach((i) => { thumbMap[i.source] = thumbs[i.source]; });
-  preview.innerHTML =
-    `<h4>Se moveran ${result.plan.length} archivos:</h4>` +
-    result.plan.slice(0, 150).map((item) => {
-      const name = item.source.split(/[\\/]/).pop();
-      const dest = item.target.split(/[\\/]/).slice(0, -1).pop();
-      const thumb = thumbMap[item.source];
-      const meta = metas[item.source];
-      return `<div class="plan-item plan-item-img">
-        ${thumb ? `<img class="thumb" src="${thumb}" alt="" />` : ''}
-        <span>${escapeHtml(name)} &rarr; ${escapeHtml(dest)}/</span>
-        ${meta && meta.width ? `<span class="meta-line">${meta.width}x${meta.height}${meta.dateTaken ? ' &middot; ' + escapeHtml(String(meta.dateTaken)) : ''}</span>` : ''}
-      </div>`;
-    }).join('') +
-    (result.plan.length > 150 ? `<div class="plan-item">... y ${result.plan.length - 150} mas.</div>` : '');
-  preview.classList.remove('hidden');
-  currentPlan = result.plan;
-  $('applyPlanBtn').disabled = false;
-});
-
-$('applyPlanBtn').addEventListener('click', async () => {
-  if (!currentPlan || !scanData) return;
   const ok = await askConfirm(
     'Aplicar organizacion',
-    `Se moveran <strong>${currentPlan.length}</strong> archivos a subcarpetas por categoria. Puedes deshacerlo desde el historial. Continuar?`
+    `Se moveran <strong>${result.plan.length}</strong> archivos a subcarpetas por categoria. Puedes deshacerlo desde el historial. Continuar?`
   );
   if (!ok) return;
-  const result = await sfoApi.applyOrganizePlan({ plan: currentPlan });
-  result.log.forEach((l) => addHistory(l));
-  showToast(`Organizacion aplicada: ${result.moved} movidos, ${result.failed} con error.`);
-  addHistory(`Organizacion: ${result.moved} archivos movidos, ${result.failed} errores.`);
-  $('applyPlanBtn').disabled = true;
-  currentPlan = null;
-  $('planPreview').classList.add('hidden');
+  const applied = await sfoApi.applyOrganizePlan({ plan: result.plan });
+  applied.log.forEach((l) => addHistory(l));
+  showToast(`Organizacion aplicada: ${applied.moved} movidos, ${applied.failed} con error.`);
+  addHistory(`Organizacion: ${applied.moved} archivos movidos, ${applied.failed} errores.`);
   await refreshUndo();
   rescan();
 });
+
+$('cancelOrganizeBtn').addEventListener('click', startNewOrganization);
+$('newOrgBtn').addEventListener('click', startNewOrganization);
+
+/* ---------- Nueva organizacion ---------- */
+function startNewOrganization() {
+  folders = [];
+  scanData = null;
+  renamePlan = null;
+  similarData = null;
+  cleanData = { emptyFolders: [], tempFiles: [] };
+  integrityData = { wrong: [], broken: [] };
+  $('resultsView').classList.remove('active');
+  $('homeView').classList.add('active');
+  $('statsView').classList.add('hidden');
+  $('progressWrap').classList.add('hidden');
+  renderFolderQueue();
+  renderFilteredFiles();
+  showToast('Nueva organizacion iniciada. Anade carpetas para comenzar.');
+}
 
 /* ---------- Reglas personalizadas ---------- */
 async function loadRules() {

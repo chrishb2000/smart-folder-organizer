@@ -17,6 +17,7 @@
       </div>
     </div>
     <div class="topbar-actions">
+      <button id="newOrgBtn" class="btn btn-primary btn-small">+ Nueva organizacion</button>
       <button id="themeToggle" class="theme-toggle" title="Cambiar tema">Modo Oscuro</button>
     </div>
   </header>
@@ -100,7 +101,8 @@
           <h3>Organizar archivos por categoria</h3>
           <p class="hint">
             Mueve los archivos de la raiz de las carpetas analizadas a subcarpetas por tipo.
-            Selecciona categorias y genera una vista previa antes de aplicar.
+            Pulsa &quot;Aplicar cambios&quot; para ejecutar directamente, o &quot;Cancelar&quot;
+            para empezar una nueva organizacion.
           </p>
         </div>
         <div id="categoryCheckboxes" class="checkbox-grid"></div>
@@ -118,10 +120,9 @@
           <div id="ruleList" class="rule-list"></div>
         </div>
         <div class="panel-actions">
-          <button id="previewPlanBtn" class="btn btn-secondary">Generar vista previa</button>
-          <button id="applyPlanBtn" class="btn btn-primary" disabled>Aplicar organizacion</button>
+          <button id="applyOrganizeBtn" class="btn btn-primary">Aplicar cambios</button>
+          <button id="cancelOrganizeBtn" class="btn btn-secondary">Cancelar y volver al inicio</button>
         </div>
-        <div id="planPreview" class="plan-preview hidden"></div>
       </div>
 
       <!-- Duplicados -->

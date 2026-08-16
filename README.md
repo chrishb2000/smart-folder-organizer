@@ -30,7 +30,8 @@ Para utilizar **Smart Folder Organizer** en tu ordenador, únicamente necesitas:
 - **🏃 Caché de Hashes Inteligente**: Los hashes MD5 se guardan entre análisis. Re-escanea la misma carpeta y la detección de duplicados es mucho más rápida.
 - **📸 Metadatos EXIF**: La vista previa de imágenes muestra dimensiones, fecha de captura y cámara (modelo) extraídas localmente.
 - **🗂️ Multi-Carpeta (Cola de Análisis)**: Añade tantas carpetas como quieras y escanea todas en lote con barra de progreso.
-- **📁 Organizador Inteligente por Categorías**: Clasifica y mueve archivos a subcarpetas por tipo: **Imágenes, Vídeos, Audios, Documentos, Instaladores, Comprimidos, Código y Otros**, con **vista previa con miniaturas y metadatos** antes de aplicar.
+- **📁 Organizador Inteligente por Categorías**: Clasifica y mueve archivos a subcarpetas por tipo: **Imágenes, Vídeos, Audios, Documentos, Instaladores, Comprimidos, Código y Otros**. Aplica directamente con un solo clic (te muestra la confirmación con el número de archivos a mover) y deshaz desde el historial.
+- **🆕 Nueva Organización**: Botón **"+ Nueva organización"** en la barra superior para reiniciar al inicio (limpiar carpetas y resultados) **sin necesidad de cerrar la aplicación**, y botón **"Cancelar"** en la pestaña Organizar para volver al inicio.
 - **📅 Organización por Fecha**: Organiza en `Año/Mes` usando la fecha del nombre o la fecha de modificación.
 - **⚙️ Reglas Personalizadas**: Crea tus propias reglas (carpeta destino + extensiones) desde la interfaz. Se guardan y se aplican en todos los análisis.
 - **🔄 Detector de Duplicados por Hash MD5**: Compara el contenido real de los archivos y agrupa las copias idénticas, con opción de **papelera o borrado seguro**.
@@ -80,7 +81,7 @@ npm start
 1. **Inicia la aplicación** con el `.exe` instalado o con `run-organizer.bat` (1 clic).
 2. Pulsa **"Añadir Carpeta"** para elegir las carpetas que quieres analizar (puedes añadir varias).
 3. Espera a que termine el análisis (verás el progreso y el gráfico de espacio en tiempo real).
-4. En **Organizar**: elige categorías, reglas personalizadas y si quieres organizar por fecha o auto-renombrar. Genera la vista previa (con miniaturas y metadatos EXIF) y aplica.
+4. En **Organizar**: elige categorías, reglas personalizadas y si quieres organizar por fecha o auto-renombrar. Pulsa **"Aplicar cambios"** para mover directamente (con confirmación), o **"Cancelar"** para volver al inicio.
 5. En **Imagenes Similares**: ajusta la sensibilidad y busca fotos casi-duplicadas (redimensionadas, re-saved, recortadas).
 6. En **Renombrar**: escribe un patrón con tokens (ej. `{fecha}_{nombre_limpio}_{sec}`), genera la vista previa y aplica.
 7. En **Duplicados**: revisa los grupos de archivos idénticos y elimina las copias extra (a papelera o borrado seguro).
@@ -89,6 +90,7 @@ npm start
 10. En **Informes**: exporta el inventario completo en CSV o HTML.
 11. En **Historial**: consulta todas las acciones, **deshaz** movimientos/renombrados o restaura archivos desde la cuarentena.
 12. Activa la casilla **"Crear respaldo .zip"** para generar un comprimido de seguridad antes de cada acción destructiva.
+13. Para **empezar una nueva organización sin cerrar la aplicación**, pulsa el botón **"+ Nueva organización"** de la barra superior (o **"Cancelar"** dentro de Organizar).
 
 > ⚠️ **Consejo de seguridad**: la aplicación siempre te pide confirmación antes de mover o eliminar archivos. Revisa las vistas previas antes de aplicar cualquier acción.
 

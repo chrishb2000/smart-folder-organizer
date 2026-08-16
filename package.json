@@ -1,6 +1,6 @@
 {
   "name": "smart-folder-organizer",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Organizador inteligente de carpetas: clasifica archivos, detecta duplicados, imagenes similares, extensiones incorrectas, archivos rotos, renombra en lote y exporta informes. 100% local y privado.",
   "main": "main.js",
   "scripts": {
